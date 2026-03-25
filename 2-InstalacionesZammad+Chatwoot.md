@@ -35,8 +35,76 @@ sudo netplan apply
 sudo apt update && sudo apt upgrade -y
 sudo reboot
 ```
+## ¿?
 
+1. Instalar las herramientas necesarias
+
+```bash
+sudo apt install curl apt-transport-https gnupg
+```
+
+2. Instalar Elasticsearch
+
+```bash
+curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elastic.gpg
+```
+```bash
+echo "deb [signed-by=/usr/share/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list
+```
+```bash
+sudo apt update
+sudo apt install elasticsearch -y
+```
+
+3. Asegurar la ubicación correcta
+   
+Enumera tus ajustes actuales de localización:
+
+```bash
+locale | grep "LANG="
+```
+
+Si lo anterior no regresa, puedes corregir este problema de la siguiente manera:
+
+```bash
+sudo apt install locales
+```
+```bash
+sudo locale-gen en_US.UTF-8
+```
+```bash
+echo "LANG=en_US.UTF-8" > sudo /etc/default/locale
+```
+
+Después de arreglarlo, asegúrate de revisar de nuevo la salida para incluir . Un reinicio puede ayudar si no tiene éxito.
+
+Añadir repositorio
+
+```bash
+curl -fsSL https://dl.packager.io/srv/zammad/zammad/key | \
+  gpg --dearmor | sudo tee /etc/apt/keyrings/pkgr-zammad.gpg > /dev/null \
+   && sudo chmod 644 /etc/apt/keyrings/pkgr-zammad.gpg
+```
+```bash
+printf "Types: deb
+URIs: https://dl.packager.io/srv/deb/zammad/zammad/stable/ubuntu
+Suites: 24.04
+Components: main
+Signed-By: /etc/apt/keyrings/pkgr-zammad.gpg" | \
+sudo tee /etc/apt/sources.list.d/zammad.sources > /dev/null
+```
+
+Instalar Zammad
+
+```bash
+sudo apt update
+```
+```bash
+sudo apt install zammad
+```
 ---
+
+¿?¿?¿?¿?¿??¿¿?¿?¿?¿?¿?¿??¿?¿?¿?¿?¿?¿?¿?¿?¿?¿?¿?¿
 
 ## Instalar dependencias + Nginx
 
