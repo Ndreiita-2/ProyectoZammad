@@ -175,10 +175,104 @@ sudo apt update
 sudo apt install zammad -y
 ```
 
-Inicializar:
+Perfecto, aquí tienes la **Opción 1** lista para copiar y pegar en tu guía, con los campos de usuario y contraseña en blanco para que los completes tú:
+
+---
+
+## 🔹 Opción 1 – Crear base de datos y usuario manualmente (Zammad 7)
+
+### 1️⃣ Acceder a PostgreSQL como `postgres`
 
 ```bash
-sudo zammad run rake db:create
+sudo -i -u postgres psql
+```
+
+---
+
+### 2️⃣ Crear usuario para Zammad
+
+```sql
+CREATE USER <TU_USUARIO> WITH PASSWORD '<TU_CONTRASEÑA>';
+```
+
+> 🔹 Reemplaza `<TU_USUARIO>` y `<TU_CONTRASEÑA>` por los que quieras usar para Zammad.
+
+---
+
+### 3️⃣ Crear la base de datos y asignarla al usuario
+
+```sql
+CREATE DATABASE <TU_BD> OWNER <TU_USUARIO>;
+```
+
+> 🔹 `<TU_BD>` puede ser por ejemplo `zammad` o cualquier nombre que prefieras.
+> 🔹 `<TU_USUARIO>` debe coincidir con el usuario que creaste en el paso anterior.
+
+---
+
+### 4️⃣ Dar privilegios completos al usuario sobre la base de datos
+
+```sql
+GRANT ALL PRIVILEGES ON DATABASE <TU_BD> TO <TU_USUARIO>;
+```
+
+---
+
+### 5️⃣ Salir de PostgreSQL
+
+```sql
+\q
+```
+
+---
+
+### 6️⃣ Configurar Zammad para usar este usuario y base de datos
+
+Editar el archivo `/opt/zammad/config/database.yml` (o equivalente según tu versión):
+
+```yaml
+production:
+  adapter: postgresql
+  database: <TU_BD>
+  username: <TU_USUARIO>
+  password: '<TU_CONTRASEÑA>'
+  host: localhost
+  encoding: unicode
+```
+
+> 🔹 Asegúrate de reemplazar los campos `<TU_BD>`, `<TU_USUARIO>` y `<TU_CONTRASEÑA>` con los valores que hayas elegido.
+
+---
+
+### 7️⃣ Inicializar la base de datos
+
+```bash
+sudo zammad run rake db:migrate
+sudo zammad run rake db:seed
+```
+
+> Esto aplica todas las migraciones y carga los datos iniciales.
+
+---
+
+### 8️⃣ Reiniciar el servicio de Zammad
+
+```bash
+sudo systemctl restart zammad
+sudo systemctl status zammad
+```
+
+> ✅ Ahora Zammad debería estar corriendo correctamente y listo para acceder vía web.
+
+---
+
+Si quieres, puedo **integrar este bloque directamente en tu guía completa de instalación de Zammad 7 + Elasticsearch + Chatwoot**, con todas las correcciones de permisos, HTTPS y usuarios vacíos listos para rellenar.
+
+¿Quieres que haga eso?
+
+
+Inicializar:
+```bash
 sudo zammad run rake db:migrate
 sudo zammad run rake db:seed
 ```
