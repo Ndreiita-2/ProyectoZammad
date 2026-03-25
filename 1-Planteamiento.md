@@ -10,8 +10,8 @@ Esta solución nos permite centralizar todos los mensajes, automatizar respuesta
 * **Chatwoot** → Entrada omnicanal y bandeja única de mensajes
 
 
-❌* **n8n / Make / Zapier** → Orquestación de flujos y automatizaciones
-❌* **OpenAI / LLM local / IA gestionada** → Inteligencia artificial para asistencia, clasificación y redacción
+* **n8n / Make / Zapier** → Orquestación de flujos y automatizaciones
+* **OpenAI / LLM local / IA gestionada** → Inteligencia artificial para asistencia, clasificación y redacción
 
 ---
 
