@@ -6,10 +6,6 @@ zm@zammad:~/chat-integration$ node index.js
 
 # 🖥️ CONFIGURACIÓN DE RED
 
-| Zammad                  | Chatwoot                |
-| ----------------------- | ----------------------- |
-| IP: **192.168.136.X** | IP: **192.168.136.Y** |
-
 Archivo netplan:
 
 ```bash
@@ -31,18 +27,6 @@ sudo nano /etc/netplan/50-cloud-init.yaml
 ```
 
 ---
-
-## 🔹 Chatwoot (192.168.136.Y)
-
-```yaml
-      addresses:
-        - 192.168.136.Y/24
-      routes:
-        - to: default
-          via: 192.168.136.1
-      nameservers:
-        addresses: [8.8.8.8,1.1.1.1]
-```
 
 Aplicar:
 
@@ -1570,93 +1554,8 @@ Este es el **importante**, porque captura todos los tipos de mensajes entrantes.
 
     Webhook → Sync Odoo
 
-✔ Con este trigger llegan mensajes del cliente SIEMPRE  
-✔ No depende del valor exacto de sender/type  
-✔ Funciona con Chatwoot → Zammad
 
-***
-
-# 🔷 **8. Validar funcionamiento**
-
-## 8.1 Mensaje del cliente
-
-1.  Cliente escribe en Chatwoot
-2.  Zammad crea artículo tipo entrante
-3.  Trigger universal se ejecuta
-4.  Odoo recibe:
-
-<!---->
-
-    Cliente: Hola, tengo una duda
-
-## 8.2 Mensaje del agente
-
-1.  Agente escribe una **nota pública**
-2.  Trigger agente se ejecuta
-3.  Odoo recibe:
-
-<!---->
-
-    Agente: Hola, ¿en qué puedo ayudarte?
-
-***
-
-# 🔷 **9. Logs para verificar**
-
-En Odoo:
-
-    sudo journalctl -u odoo -f
-
-Debes ver:
-
-    POST /api/zammad_ticket
-
-
-cuando escriba el cliente y cuando escriba el agente.
-
-***
-
-
-
-
-
-DEFINITIVO PARA INTEGRAR INSTAGRAM CON CHATWOOT
-✅ SOLUCIÓN EXACTA (ESTA ES LA BUENA)
-🔹 Paso 1 — Ve a Meta
-
-👉 Menú izquierdo
-👉 Casos de uso
-👉 Instagram → Personalizar
-
-🔹 Paso 2 — Completa TODO hasta el final
-
-Especialmente:
-
-👉 Paso 2: Generar tokens de acceso
-
-👉 Paso 3: Webhooks (aunque falle ahora)
-
-🔹 Paso 3 — IR A CONFIGURACIÓN OCULTA
-
-Ahora lo importante 👇
-
-👉 Arriba (muy importante) busca:
-
-Configuración de la app → Avanzada / Settings
-
-🔹 Paso 4 — Añadir Redirect URI AQUÍ
-
-Busca algo como:
-
-👉 Valid OAuth Redirect URIs (Instagram)
-o
-👉 Client OAuth Settings
-
-🔥 Y AÑADE EXACTAMENTE:
-https://polygalaceous-alaysia-unsilently.ngrok-free.dev/instagram/callback
-
-
-## 🌍 Exponer con Ngrok
+## Exponer con Ngrok
 
 Proyecto: **ngrok**
 
