@@ -210,7 +210,7 @@ services:
     environment:
       RAILS_ENV: production
       SECRET_KEY_BASE: "CAMBIAR_POR_CLAVE"
-      FRONTEND_URL: "http://192.168.136.121:3000"
+      FRONTEND_URL: "http://192.168.136.Y:3000"
       REDIS_URL: redis://redis:6379
       POSTGRES_HOST: postgres
       POSTGRES_USERNAME: chatwoot
@@ -240,21 +240,8 @@ docker compose up -d
 ## ACCESO LOCAL CHATWOOT
 
 ```
-http://192.168.136.121:3000
+http://192.168.136.Y:3000
 ```
-
-
-
-
-# 🧩 RESULTADO FINAL DEL LAB
-
-| Servicio | IP              | Acceso                                                               |
-| -------- | --------------- | -------------------------------------------------------------------- |
-| Zammad   | 192.168.136.120 | [https://polygalaceous-alaysia-unsilently.ngrok-free.dev/](https://polygalaceous-alaysia-unsilently.ngrok-free.dev/) |
-| Chatwoot | 192.168.136.121 | [http://192.168.136.121:3000/](http://192.168.136.121:3000/) |
-
-
----
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
