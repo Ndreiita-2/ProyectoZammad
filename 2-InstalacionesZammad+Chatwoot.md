@@ -1,10 +1,7 @@
-zm@zammad:~$ ngrok http 80
 
 
-zm@zammad:~/chat-integration$ node index.js
-
-
-# 🖥️ CONFIGURACIÓN DE RED
+# Zammad
+## CONFIGURACIÓN DE RED
 
 Archivo netplan:
 
@@ -1397,7 +1394,9 @@ ngrok config add-authtoken TU_TOKEN_AQUI
 Exponer:
 
 ```bash
-ngrok http 80 / 3000
+zm@zammad:~$ ngrok http 80
+
+zm@zammad:~/chat-integration$ node index.js
 ```
 
 Acceso remoto:
