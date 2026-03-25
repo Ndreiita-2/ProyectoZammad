@@ -1,13 +1,31 @@
 # ¿CÓMO REEMPLAZAMOS ZENDESK?
 
-## ZAMMAD
-La idea parte de un software helpdesk tipo ticketing de código abierto llamado **Zammad**, el cuál ya cuenta con un sistema de creación y gestión de tickets muy completo, sin necesidad de meterle módulos ni nada adicional. 
+La propuesta consiste en reemplazar Zendesk por un stack open source y autoalojado, combinando Zammad para gestión de tickets y soporte estructurado, Chatwoot para canales omnicanal y mensajería, y automatización / IA externa para optimizar procesos y productividad.
 
-Según el planteamiento, ésta es la plataforma de atención al cliente principal, por la cuál se van a responder a todos los mensajes mediante los tickets que se crean automáticamente.
+Esta solución nos permite centralizar todos los mensajes, automatizar respuestas, clasificar tickets automáticamente y mantener control total de los datos, todo sin depender de SaaS costosos.
 
-Además de ser de lo más intuitivo a nivel sistemas, cuenta con las siguientes ventajas frente a cualquier otro software:
+## Stack final
 
-* Especializado en Helpdesk / Ticketing
+* **Zammad** → Gestión avanzada de tickets y soporte interno
+* **Chatwoot** → Entrada omnicanal y bandeja única de mensajes
+❌* **n8n / Make / Zapier** → Orquestación de flujos y automatizaciones
+❌* **OpenAI / LLM local / IA gestionada** → Inteligencia artificial para asistencia, clasificación y redacción
+
+---
+
+## Flujo de atención al cliente
+
+1. Cliente envía mensaje desde cualquier canal (WhatsApp, Instagram, web, email, TikTok, etc.)
+2. Chatwoot recibe el mensaje en **una bandeja unificada**
+3. Webhook → crea automáticamente un ticket en Zammad
+4. Zammad gestiona el ticket internamente, aplicando reglas, asignaciones y SLA
+5. Respuesta del agente → vuelve a Chatwoot → cliente recibe respuesta desde el canal original
+
+## ZAMMAD – Gestión avanzada de tickets
+
+Zammad será la **plataforma principal de atención**, especializada en tickets y soporte estructurado.
+
+* **Especializado en Helpdesk / Ticketing**
 
   * Sistema de tickets avanzado
   * Historial completo (auditado)
@@ -16,7 +34,7 @@ Además de ser de lo más intuitivo a nivel sistemas, cuenta con las siguientes 
   * Multitarea (varios tickets abiertos)
   * Plantillas de respuesta
 
-* Multicanal
+* **Multicanal**
 
   * Email (canal principal)
   * Web (formularios / tickets)
@@ -24,7 +42,7 @@ Además de ser de lo más intuitivo a nivel sistemas, cuenta con las siguientes 
   * SMS
   * Teléfono (CTI / VoIP)
 
-* Automatización y gestión operativa
+* **Automatización y gestión operativa**
 
   * Reglas
   * Triggers
@@ -34,7 +52,7 @@ Además de ser de lo más intuitivo a nivel sistemas, cuenta con las siguientes 
   * Priorización de tickets
   * Asignación automática
 
-* Personalización del sistema
+* **Personalización del sistema**
 
   * Campos personalizados
   * Roles y permisos
@@ -42,17 +60,17 @@ Además de ser de lo más intuitivo a nivel sistemas, cuenta con las siguientes 
   * Plantillas
   * Flujos / procesos
 
-* Integración con sistemas externos
+* **Integración con sistemas externos**
 
   * API REST
-  * Webhooks (Chatwoot)
+  * Webhooks (Chatwoot y otros)
   * Sistemas de autenticación (SSO)
   * LDAP / Active Directory
   * Exchange (correo corporativo)
   * GitHub / GitLab
-  * Sistemas de monitorización (Nagios, etc.)
+  * Sistemas de monitorización (Nagios, Zabbix, etc.)
 
-* IA integrada
+* **IA integrada**
 
   * Resumen automático de tickets
   * Redacción asistida
@@ -60,27 +78,27 @@ Además de ser de lo más intuitivo a nivel sistemas, cuenta con las siguientes 
   * Mejora de texto
   * Detección automática de idioma
 
-* IA externa (configurable)
+* **IA externa (configurable)**
 
   * OpenAI / Azure
   * Modelos propios (LLM local)
   * IA gestionada por Zammad
 
-* AI Agents (automatización inteligente)
+* **AI Agents (automatización inteligente)**
 
   * Clasificación automática de tickets
   * Priorización de urgencia
   * Asignación a equipos
   * Reescritura de títulos
 
-* Gestión de clientes (tipo CRM)
+* **Gestión de clientes (tipo CRM)**
 
   * Perfiles de usuario
   * Historial de interacción
   * Organizaciones (empresas)
   * Integración con datos externos (Clearbit)
 
-* Seguridad y control
+* **Seguridad y control**
 
   * Open source
   * Self-hosted
@@ -88,16 +106,14 @@ Además de ser de lo más intuitivo a nivel sistemas, cuenta con las siguientes 
   * 2FA
   * Encriptación (S/MIME)
   * Control total de datos
+
 ---
 
-## Chatwoot
-Chatwoot es el software secundario, también de código abierto y autoalojado, que necesitamos para integrar las redes sociales y el chat de soporte en la web, teniendo todos los mensajes centralizados en un solo canal.
+## CHATWOOT – Entrada omnicanal y bandeja única
 
-Éste se integra con Zammad mediante Webhooks, para que todos los mensajes que llegan al canal de Chatwoot creen ticket en Zammad y puedan ser respondidos ahí mismo.
+Chatwoot será la **plataforma secundaria**, encargada de centralizar todos los canales de comunicación y enviar mensajes a Zammad como tickets.
 
-Aquí nombro sus ventajas:
-
-* Bandeja unificada (Omnicanal)
+* **Bandeja unificada (Omnicanal)**
 
   * Todos los mensajes en una sola inbox
   * WhatsApp
@@ -109,7 +125,7 @@ Aquí nombro sus ventajas:
   * Email
   * API propia (para conectar cualquier canal)
 
-* Automatización y gestión operativa
+* **Automatización y gestión operativa**
 
   * Reglas automáticas
   * Respuestas automáticas
@@ -117,7 +133,7 @@ Aquí nombro sus ventajas:
   * Asignación automática de conversaciones
   * Etiquetado y clasificación
 
-* Chatbots y automatización conversacional
+* **Chatbots y automatización conversacional**
 
   * Dialogflow (Google)
   * Rasa (open source)
@@ -125,7 +141,7 @@ Aquí nombro sus ventajas:
   * Auto-respuestas
   * Clasificación de leads
 
-* IA integrada (Captain AI)
+* **IA integrada (Captain AI)**
 
   * Sugerencias automáticas de respuesta
   * Respuestas a preguntas frecuentes
@@ -133,9 +149,41 @@ Aquí nombro sus ventajas:
   * Mejora de respuestas
   * Uso de base de conocimiento
 
-* Integración con IA externa
+* **Integración con IA externa**
 
-  * Webhooks (envío y recepción en tiempo real)
-  * API REST completa
-  * Integración con herramientas externas (n8n, Zapier, Make, etc.)
-  * Conexión con modelos como OpenAI u otros LLMs
+  * Webhooks para conexión con n8n / Make
+  * API REST para flujos personalizados
+  * Conexión con OpenAI u otros LLMs
+
+---
+
+## Analítica y Reporting
+
+Para medir desempeño y tomar decisiones estratégicas:
+
+* Métricas de tickets (Zammad)
+* Métricas de conversación y engagement (Chatwoot)
+* Exportación de datos para BI (Metabase, Power BI, Looker)
+* Reportes de SLA y tiempos de respuesta
+* Monitoreo de satisfacción del cliente
+
+---
+
+## Ventajas frente a Zendesk
+
+* Open source → sin lock-in ni costos SaaS altos
+* Autoalojado → control total de datos y privacidad
+* Integración nativa con IA → automatización y asistencia inteligente
+* Centralización de todos los canales → flujo omnicanal
+* Personalización ilimitada → reglas, macros, flujos y roles
+* Compatible con sistemas corporativos y herramientas externas
+
+---
+
+## Limitaciones y consideraciones
+
+* Requiere configuración técnica y mantenimiento
+* WhatsApp depende de API oficial
+* Integraciones con algunas redes sociales pueden necesitar setup adicional
+* No es plug & play como Zendesk
+
