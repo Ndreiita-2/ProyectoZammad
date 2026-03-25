@@ -200,6 +200,7 @@ services:
 
   chatwoot:
     image: chatwoot/chatwoot:latest
+  ¿ image: chatwoot/chatwoot:v4.11.0
     restart: unless-stopped
     depends_on:
       - postgres
