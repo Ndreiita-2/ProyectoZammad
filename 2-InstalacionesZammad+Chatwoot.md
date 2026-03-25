@@ -46,15 +46,33 @@ sudo apt install curl apt-transport-https gnupg
 2. Instalar Elasticsearch
 
 ```bash
-curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elastic.gpg
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /etc/apt/keyrings/elastic.gpg
 ```
+
+
 ```bash
-echo "deb [signed-by=/usr/share/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list
+echo "deb [signed-by=/etc/apt/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list
 ```
+
+
 ```bash
 sudo apt update
+```
+
+---
+
+```bash
 sudo apt install elasticsearch -y
 ```
+
+```bash
+sudo systemctl enable elasticsearch
+sudo systemctl start elasticsearch
+sudo systemctl status elasticsearch
+```
+
+
 
 3. Asegurar la ubicación correcta
    
