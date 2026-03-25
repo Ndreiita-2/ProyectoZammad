@@ -262,20 +262,6 @@ sudo systemctl restart zammad
 sudo systemctl status zammad
 ```
 
-> ✅ Ahora Zammad debería estar corriendo correctamente y listo para acceder vía web.
-
----
-
-Si quieres, puedo **integrar este bloque directamente en tu guía completa de instalación de Zammad 7 + Elasticsearch + Chatwoot**, con todas las correcciones de permisos, HTTPS y usuarios vacíos listos para rellenar.
-
-¿Quieres que haga eso?
-
-
-Inicializar:
-```bash
-sudo zammad run rake db:migrate
-sudo zammad run rake db:seed
-```
 
 Reiniciar:
 
@@ -283,6 +269,17 @@ Reiniciar:
 sudo systemctl restart zammad
 ```
 
+Crear archivo de configuración para Zammad
+
+```bash
+sudo nano /etc/nginx/sites-available/zammad.conf
+```
+
+```bash
+server {
+    server_name TU_DOMINIO_O_IP;
+}
+```
 ---
 
 ## ACCESO LOCAL ZAMMAD
