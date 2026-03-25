@@ -904,34 +904,6 @@ Si reinicias Node, pierde la relación.
 
 ---
 
--------------------------------TOKEN INVALID AL REINICIAR------------------------------------------------
-
-2️⃣ Cambiar la Base URL manualmente
-
-En tu servidor ejecuta:
-```
-sudo zammad run rails c
-```
-Ahora pega esto:
-```
-Setting.set('fqdn', 'localhost')
-```
-y luego:
-```
-Setting.set('http_type', 'http')
-```
-Esto hace que Zammad deje de esperar la URL de ngrok.
-
-Sal de la consola:
-
-exit
-🔧 3️⃣ Reiniciar Zammad
-```
-sudo systemctl restart zammad
-```
-Espera unos segundos.
-
-
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -967,6 +939,35 @@ Acceso remoto:
 ```
 https://Z.ngrok-free.dev/
 ```
+
+
+# TOKEN INVALID AL REINICIAR
+
+## Cambiar la Base URL manualmente
+
+En tu servidor ejecuta:
+```
+sudo zammad run rails c
+```
+Ahora pega esto:
+```
+Setting.set('fqdn', 'localhost')
+```
+y luego:
+```
+Setting.set('http_type', 'http')
+```
+Esto hace que Zammad deje de esperar la URL de ngrok.
+
+Sal de la consola:
+
+exit
+## Reiniciar Zammad
+```
+sudo systemctl restart zammad
+```
+Espera unos segundos.
+
 
 
 # CAMBIAR CONTRASEÑA DEL USUARIO ADMIN EN CHATWOOT
