@@ -317,7 +317,9 @@ URL:
 ```
 http://TU_SERVIDOR/webhook/chatwoot
 ```
+
 ----------------------------------------------nirarlo------------------------------------------------------
+
 Opción 3 — Permitir HTTP (solo laboratorio)
 
 Si quieres seguir en local sin HTTPS, tienes que cambiar configuración interna de Chatwoot:
@@ -345,8 +347,9 @@ Añade:
 192.168.136.125 chatwoot-middleware.local
 
 Luego en Chatwoot usa:
-
+```
 http://chatwoot-middleware.local:4000/chatwoot
+```
 --------------------------------------------------------------------------------------------------------------------------
 Evento:
 
