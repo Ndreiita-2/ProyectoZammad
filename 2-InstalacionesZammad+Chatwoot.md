@@ -1,13 +1,16 @@
-# Zammad
-## CONFIGURACIÓN DE RED
+# Configuración de máquina virtual con Zammad
 
-Archivo netplan:
+## Configuración de red
+
+Editar archivo de configuración de red (netplan):
 
 ```bash
 sudo nano /etc/netplan/50-cloud-init.yaml
 ```
 
 ---
+
+Configuración de red estática:
 
 ```yaml
       addresses:
@@ -21,7 +24,7 @@ sudo nano /etc/netplan/50-cloud-init.yaml
 
 ---
 
-Aplicar:
+Aplicar configuración de red:
 
 ```bash
 sudo netplan apply
@@ -29,77 +32,121 @@ sudo netplan apply
 
 ---
 
-## Actualizar
+## Actualización del sistema
+
+Actualizar paquetes del sistema y reiniciar:
 
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo reboot
 ```
 
-## Instalar las herramientas necesarias
+---
+
+## Instalación de dependencias necesarias
+
+Instalar herramientas básicas necesarias para repositorios y descargas:
 
 ```bash
 sudo apt install curl apt-transport-https gnupg
 ```
 
-## Instalar Elasticsearch
+---
+
+## Instalación de Elasticsearch
+
+Crear directorio para almacenar claves GPG:
 
 ```bash
 sudo mkdir -p /etc/apt/keyrings
+```
+
+Descargar y guardar la clave GPG oficial de Elasticsearch:
+
+```bash
 curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /etc/apt/keyrings/elastic.gpg
 ```
 
+Añadir repositorio oficial de Elasticsearch:
 
 ```bash
 echo "deb [signed-by=/etc/apt/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list
 ```
 
+Actualizar lista de paquetes:
 
 ```bash
 sudo apt update
 ```
 
----
+Instalar Elasticsearch:
 
 ```bash
 sudo apt install elasticsearch -y
 ```
 
+Habilitar Elasticsearch para que arranque con el sistema:
+
 ```bash
 sudo systemctl enable elasticsearch
+```
+
+Iniciar servicio de Elasticsearch:
+
+```bash
 sudo systemctl start elasticsearch
+```
+
+Verificar estado del servicio:
+
+```bash
 sudo systemctl status elasticsearch
 ```
 
-## Asegurar la ubicación correcta
-   
-Enumera tus ajustes actuales de localización:
+---
+
+## Configuración de localización del sistema
+
+Verificar configuración actual del idioma:
 
 ```bash
 locale | grep "LANG="
 ```
 
-Si lo anterior no regresa, puedes corregir este problema de la siguiente manera:
+Instalar paquete de localización si es necesario:
 
 ```bash
 sudo apt install locales
 ```
+
+Generar localización en inglés UTF-8:
+
 ```bash
 sudo locale-gen en_US.UTF-8
 ```
+
+Definir idioma por defecto del sistema:
+
 ```bash
 echo "LANG=en_US.UTF-8" > sudo /etc/default/locale
 ```
 
-Después de arreglarlo, asegúrate de revisar de nuevo la salida para incluir . Un reinicio puede ayudar si no tiene éxito.
+Verificar configuración nuevamente o reiniciar si es necesario.
 
-## Añadir repositorio
+---
+
+## Añadir repositorio de Zammad
+
+Descargar y guardar clave GPG de Zammad:
 
 ```bash
 curl -fsSL https://dl.packager.io/srv/zammad/zammad/key | \
   gpg --dearmor | sudo tee /etc/apt/keyrings/pkgr-zammad.gpg > /dev/null \
    && sudo chmod 644 /etc/apt/keyrings/pkgr-zammad.gpg
 ```
+
+Añadir repositorio oficial de Zammad:
+
 ```bash
 printf "Types: deb
 URIs: https://dl.packager.io/srv/deb/zammad/zammad/stable/ubuntu
@@ -109,19 +156,27 @@ Signed-By: /etc/apt/keyrings/pkgr-zammad.gpg" | \
 sudo tee /etc/apt/sources.list.d/zammad.sources > /dev/null
 ```
 
-## Instalar Zammad
+---
+
+## Instalación de Zammad
+
+Actualizar repositorios:
 
 ```bash
 sudo apt update
 ```
+
+Instalar Zammad:
+
 ```bash
 sudo apt install zammad
 ```
+
 ---
 
-# Creamos base de datos y usuario manualmente
+# Creación manual de base de datos y usuario
 
-## Acceder a PostgreSQL como `postgres`
+## Acceder a PostgreSQL como usuario administrador
 
 ```bash
 sudo -i -u postgres psql
@@ -131,26 +186,27 @@ sudo -i -u postgres psql
 
 ## Crear usuario para Zammad
 
+Crear usuario de base de datos con contraseña:
+
 ```sql
 CREATE USER <TU_USUARIO> WITH PASSWORD '<TU_CONTRASEÑA>';
 ```
 
-> 🔹 Reemplaza `<TU_USUARIO>` y `<TU_CONTRASEÑA>` por los que quieras usar para Zammad.
-
 ---
 
-## Crear la base de datos y asignarla al usuario
+## Crear la base de datos
+
+Crear base de datos y asignar propietario:
 
 ```sql
 CREATE DATABASE <TU_BD> OWNER <TU_USUARIO>;
 ```
 
-> 🔹 `<TU_BD>` puede ser por ejemplo `zammad` o cualquier nombre que prefieras.
-> 🔹 `<TU_USUARIO>` debe coincidir con el usuario que creaste en el paso anterior.
-
 ---
 
-## Dar privilegios completos al usuario sobre la base de datos
+## Asignar privilegios al usuario
+
+Otorgar control total sobre la base de datos:
 
 ```sql
 GRANT ALL PRIVILEGES ON DATABASE <TU_BD> TO <TU_USUARIO>;
@@ -166,13 +222,16 @@ GRANT ALL PRIVILEGES ON DATABASE <TU_BD> TO <TU_USUARIO>;
 
 ---
 
-## Configurar Zammad para usar este usuario y base de datos
+## Configuración de conexión a base de datos en Zammad
 
-Editamos el archivo:
+Editar archivo de configuración:
+
 ```bash
 sudo nano /opt/zammad/config/database.yml
 ```
-Lo dejamos con:
+
+Definir conexión a base de datos:
+
 ```yaml
 production:
   adapter: postgresql
@@ -183,53 +242,61 @@ production:
   encoding: unicode
 ```
 
-> Nos aseguramos de reemplazar los campos `<TU_BD>`, `<TU_USUARIO>` y `<TU_CONTRASEÑA>` con los valores que hemos elegido.
-
 ---
 
-## Inicializar la base de datos
+## Inicialización de la base de datos
+
+Aplicar estructura de base de datos:
 
 ```bash
 sudo zammad run rake db:migrate
+```
+
+Cargar datos iniciales del sistema:
+
+```bash
 sudo zammad run rake db:seed
 ```
 
-> Esto aplica todas las migraciones y carga los datos iniciales.
-
 ---
 
-## Reiniciar el servicio de Zammad
+## Reinicio del servicio de Zammad
+
+Reiniciar servicio para aplicar cambios:
 
 ```bash
 sudo systemctl restart zammad
+```
+
+Verificar estado del servicio:
+
+```bash
 sudo systemctl status zammad
 ```
 
+---
 
-Reiniciar:
+## Configuración de Nginx para Zammad
 
-```bash
-sudo systemctl restart zammad
-```
-
-Crear archivo de configuración para Zammad
-
-Editamos nginx:
+Editar archivo de configuración web:
 
 ```bash
 sudo nano /etc/nginx/sites-available/zammad.conf
 ```
 
-Modificamos el siguiente apartado:
+Definir dominio o IP del servidor:
 
 ```bash
 server {
     server_name TU_DOMINIO_O_IP;
 }
 ```
+
 ---
 
-## ACCESO LOCAL ZAMMAD
+## Acceso local a Zammad
+
+Acceder desde navegador:
 
 ```
 http://192.168.136.X
