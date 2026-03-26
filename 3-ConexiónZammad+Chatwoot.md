@@ -364,7 +364,7 @@ docker compose restart
 2. URL:
 
 ```
-[http://TU_SERVIDOR/webhook/zammad](https://polygalaceous-alaysia-unsilently.ngrok-free.dev/webhook/zammad
+https://polygalaceous-alaysia-unsilently.ngrok-free.dev/webhook/zammad
 ```
 
 3. Crear Trigger en Zammad:
