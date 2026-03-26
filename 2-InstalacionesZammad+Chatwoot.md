@@ -521,37 +521,109 @@ http://192.168.136.Y:3000
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Exponer con Ngrok
+Perfecto. Aquí tienes la **guía finalizada y completa**, incorporando todo lo que hicimos para exponer Zammad a Internet usando **ngrok en el puerto 80**. Está lista para seguir paso a paso desde la instalación de ngrok hasta la configuración final de Nginx.
 
-Proyecto: **ngrok**
+---
 
-Instalar:
+# Guía para exponer Zammad a Internet con ngrok (puerto 80)
 
-```bash
-curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
-sudo apt update
-sudo apt install ngrok -y
-```
+## 1. Instalar y actualizar ngrok
 
-Configurar token:
+1. Eliminar versión antigua de ngrok:
 
 ```bash
-ngrok config add-authtoken TU_TOKEN_AQUI
+sudo rm /usr/local/bin/ngrok
 ```
 
-Exponer:
+2. Descargar la versión más reciente (Linux AMD64):
 
 ```bash
-zm@zammad:~$ ngrok http 80
-
-zm@zammad:~/chat-integration$ node index.js
+wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
 ```
 
-Acceso remoto:
+3. Descomprimir y mover el binario:
+
+```bash
+tar -xvzf ngrok-v3-stable-linux-amd64.tgz
+sudo mv ngrok /usr/local/bin/
+```
+
+4. Verificar versión:
+
+```bash
+ngrok version
+```
+
+Debe mostrar algo como `ngrok version 3.x.x`.
+
+5. Autenticar ngrok con tu token (obtenido en [dashboard.ngrok.com](https://dashboard.ngrok.com/get-started/your-authtoken)):
+
+```bash
+ngrok config add-authtoken <TU_AUTH_TOKEN>
+```
+
+---
+
+## 2. Configurar Nginx para trabajar con ngrok
+
+1. Editar el archivo de configuración de Zammad:
+
+```bash
+sudo nano /etc/nginx/sites-available/zammad.conf
+```
+
+2. Modificar los siguientes valores:
+
+* Cambiar `server_name` a `localhost`:
+
+```nginx
+server_name localhost;
+```
+* Mantener los `upstream` y proxys tal como están (Rails server y websockets).
+
+3. Habilitar la configuración (si aún no lo estaba):
+
+```bash
+sudo ln -s /etc/nginx/sites-available/zammad.conf /etc/nginx/sites-enabled/zammad.conf
+```
+
+* Si el enlace ya existe, no hace falta volver a crearlo.
+
+4. Deshabilitar el sitio por defecto de Nginx para evitar la página “Welcome”:
+
+```bash
+sudo rm /etc/nginx/sites-enabled/default
+```
+
+5. Probar configuración y reiniciar Nginx:
+
+```bash
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+---
+
+4. Reiniciar Zammad:
+
+```bash
+sudo systemctl restart zammad
+```
+
+---
+
+## 4. Levantar túnel de ngrok
+
+1. Ejecutar ngrok apuntando al puerto 80 (Nginx):
+
+```bash
+ngrok http 80
+```
+
+2. Copiar el enlace HTTPS que ngrok genera, por ejemplo:
 
 ```
-https://Z.ngrok-free.dev/
+https://polygalaceous-alaysia-unsilently.ngrok-free.dev/
 ```
 
 
