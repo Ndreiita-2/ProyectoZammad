@@ -1,10 +1,5 @@
-Perfecto. He revisado las dos guías que me pasaste y he unificado todo en **una guía corregida y coherente**, compatible con **Zammad 7** y **Chatwoot 4.12.1**, usando un **middleware Node.js**. Incluye la instalación, configuración, Nginx, y pasos de prueba.
 
----
-
-# Guía final corregida: Integración bidireccional Chatwoot ↔ Zammad con Node.js
-
----
+# Integración bidireccional Chatwoot ↔ Zammad con Node.js
 
 ## 1. Preparar el middleware Node.js
 
