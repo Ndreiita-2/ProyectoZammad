@@ -447,7 +447,7 @@ services:
     restart: unless-stopped
 
   chatwoot:
-    image: chatwoot/chatwoot:v4.11.0
+    image: chatwoot/chatwoot:v4.12.1
     restart: unless-stopped
     depends_on:
       - postgres
@@ -490,7 +490,7 @@ Sustituir el valor `CAMBIAR_POR_CLAVE` en el archivo docker-compose.yml.
 Iniciar contenedores en segundo plano:
 
 ```bash
-docker compose up -d
+sudo docker compose up -d
 ```
 
 ---
@@ -500,7 +500,7 @@ docker compose up -d
 Comprobar que los servicios están activos:
 
 ```bash
-docker ps
+sudo docker ps
 ```
 
 Ver logs en caso de error:
