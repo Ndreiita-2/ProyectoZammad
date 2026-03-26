@@ -35,15 +35,14 @@ sudo netplan apply
 sudo apt update && sudo apt upgrade -y
 sudo reboot
 ```
-## ¿?
 
-1. Instalar las herramientas necesarias
+## Instalar las herramientas necesarias
 
 ```bash
 sudo apt install curl apt-transport-https gnupg
 ```
 
-2. Instalar Elasticsearch
+## Instalar Elasticsearch
 
 ```bash
 sudo mkdir -p /etc/apt/keyrings
@@ -72,9 +71,7 @@ sudo systemctl start elasticsearch
 sudo systemctl status elasticsearch
 ```
 
-
-
-3. Asegurar la ubicación correcta
+## Asegurar la ubicación correcta
    
 Enumera tus ajustes actuales de localización:
 
@@ -96,7 +93,7 @@ echo "LANG=en_US.UTF-8" > sudo /etc/default/locale
 
 Después de arreglarlo, asegúrate de revisar de nuevo la salida para incluir . Un reinicio puede ayudar si no tiene éxito.
 
-Añadir repositorio
+## Añadir repositorio
 
 ```bash
 curl -fsSL https://dl.packager.io/srv/zammad/zammad/key | \
@@ -112,7 +109,7 @@ Signed-By: /etc/apt/keyrings/pkgr-zammad.gpg" | \
 sudo tee /etc/apt/sources.list.d/zammad.sources > /dev/null
 ```
 
-Instalar Zammad
+## Instalar Zammad
 
 ```bash
 sudo apt update
@@ -122,66 +119,9 @@ sudo apt install zammad
 ```
 ---
 
-¿?¿?¿?¿?¿??¿¿?¿?¿?¿?¿?¿??¿?¿?¿?¿?¿?¿?¿?¿?¿?¿?¿?¿
+# Creamos base de datos y usuario manualmente
 
-## Instalar dependencias + Nginx
-
-```bash
-sudo apt install curl gnupg apt-transport-https ca-certificates lsb-release nginx postgresql redis-server -y
-```
-
----
-
-## Instalar Elasticsearch
-
-```bash
-curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elastic.gpg
-
-echo "deb [signed-by=/usr/share/keyrings/elastic.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list
-
-sudo apt update
-sudo apt install elasticsearch -y
-```
-
-Editar:
-
-```bash
-sudo nano /etc/elasticsearch/elasticsearch.yml
-```
-
-Asegurar:
-
-```
-network.host: localhost
-```
-
-Activar:
-
-```bash
-sudo systemctl enable elasticsearch
-sudo systemctl start elasticsearch
-```
-
----
-
-## Instalar Zammad
-
-```bash
-curl -fsSL https://dl.packager.io/srv/zammad/zammad/key | sudo gpg --dearmor -o /usr/share/keyrings/zammad.gpg
-
-echo "deb [signed-by=/usr/share/keyrings/zammad.gpg] https://dl.packager.io/srv/deb/zammad/zammad/stable/ubuntu 22.04 main" | sudo tee /etc/apt/sources.list.d/zammad.list
-
-sudo apt update
-sudo apt install zammad -y
-```
-
-Perfecto, aquí tienes la **Opción 1** lista para copiar y pegar en tu guía, con los campos de usuario y contraseña en blanco para que los completes tú:
-
----
-
-## 🔹 Opción 1 – Crear base de datos y usuario manualmente (Zammad 7)
-
-### 1️⃣ Acceder a PostgreSQL como `postgres`
+## Acceder a PostgreSQL como `postgres`
 
 ```bash
 sudo -i -u postgres psql
@@ -189,7 +129,7 @@ sudo -i -u postgres psql
 
 ---
 
-### 2️⃣ Crear usuario para Zammad
+## Crear usuario para Zammad
 
 ```sql
 CREATE USER <TU_USUARIO> WITH PASSWORD '<TU_CONTRASEÑA>';
@@ -199,7 +139,7 @@ CREATE USER <TU_USUARIO> WITH PASSWORD '<TU_CONTRASEÑA>';
 
 ---
 
-### 3️⃣ Crear la base de datos y asignarla al usuario
+## Crear la base de datos y asignarla al usuario
 
 ```sql
 CREATE DATABASE <TU_BD> OWNER <TU_USUARIO>;
@@ -210,7 +150,7 @@ CREATE DATABASE <TU_BD> OWNER <TU_USUARIO>;
 
 ---
 
-### 4️⃣ Dar privilegios completos al usuario sobre la base de datos
+## Dar privilegios completos al usuario sobre la base de datos
 
 ```sql
 GRANT ALL PRIVILEGES ON DATABASE <TU_BD> TO <TU_USUARIO>;
@@ -218,7 +158,7 @@ GRANT ALL PRIVILEGES ON DATABASE <TU_BD> TO <TU_USUARIO>;
 
 ---
 
-### 5️⃣ Salir de PostgreSQL
+## Salir de PostgreSQL
 
 ```sql
 \q
@@ -226,10 +166,13 @@ GRANT ALL PRIVILEGES ON DATABASE <TU_BD> TO <TU_USUARIO>;
 
 ---
 
-### 6️⃣ Configurar Zammad para usar este usuario y base de datos
+## Configurar Zammad para usar este usuario y base de datos
 
-Editar el archivo `/opt/zammad/config/database.yml` (o equivalente según tu versión):
-
+Editamos el archivo:
+```bash
+sudo nano /opt/zammad/config/database.yml
+```
+Lo dejamos con:
 ```yaml
 production:
   adapter: postgresql
@@ -240,11 +183,11 @@ production:
   encoding: unicode
 ```
 
-> 🔹 Asegúrate de reemplazar los campos `<TU_BD>`, `<TU_USUARIO>` y `<TU_CONTRASEÑA>` con los valores que hayas elegido.
+> Nos aseguramos de reemplazar los campos `<TU_BD>`, `<TU_USUARIO>` y `<TU_CONTRASEÑA>` con los valores que hemos elegido.
 
 ---
 
-### 7️⃣ Inicializar la base de datos
+## Inicializar la base de datos
 
 ```bash
 sudo zammad run rake db:migrate
@@ -255,7 +198,7 @@ sudo zammad run rake db:seed
 
 ---
 
-### 8️⃣ Reiniciar el servicio de Zammad
+## Reiniciar el servicio de Zammad
 
 ```bash
 sudo systemctl restart zammad
@@ -271,9 +214,13 @@ sudo systemctl restart zammad
 
 Crear archivo de configuración para Zammad
 
+Editamos nginx:
+
 ```bash
 sudo nano /etc/nginx/sites-available/zammad.conf
 ```
+
+Modificamos el siguiente apartado:
 
 ```bash
 server {
@@ -288,8 +235,7 @@ server {
 http://192.168.136.X
 ```
 
----
-
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # INSTALACIÓN CHATWOOT (DOCKER)
 
