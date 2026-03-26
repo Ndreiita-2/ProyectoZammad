@@ -189,8 +189,234 @@ app.listen(process.env.PORT || 4000, () => {
   console.log(`Middleware corriendo en puerto ${process.env.PORT || 4000}`);
 });
 ```
+---------------------------------------------------------------------------------------------
+```
+// index.js
+import express from "express";
+import axios from "axios";
+import dotenv from "dotenv";
+import fs from "fs";
 
----
+dotenv.config();
+
+const app = express();
+app.use(express.json());
+
+/* =========================================================
+   Utilidad de limpieza: sin HTML, sin [zammad]/[chatwoot], sin firma
+   ========================================================= */
+function cleanBody(text = "") {
+  let t = String(text);
+
+  // Decodifica entidades básicas
+  t = t.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+
+  // Elimina etiquetas HTML
+  t = t.replace(/<[^>]*>/g, "");
+
+  // Elimina prefijos tipo [zammad] o [chatwoot] al inicio
+  t = t.replace(/^\s*\[(zammad|chatwoot)\]\s*/i, "");
+
+  // Corta tras separador de firma clásico
+  t = t.split("\n-- ")[0];
+
+  // Limpieza de espacios
+  t = t.replace(/\s+\n/g, "\n").trim();
+
+  return t;
+}
+
+/* =========================================================
+   PERSISTENCIA conversationMap  (con JSON en disco)
+   ========================================================= */
+const MAP_FILE = "./conversationMap.json";
+let conversationMap = {};
+try {
+  if (fs.existsSync(MAP_FILE)) {
+    conversationMap = JSON.parse(fs.readFileSync(MAP_FILE, "utf8"));
+  }
+} catch {
+  conversationMap = {};
+}
+function saveMap() {
+  try {
+    fs.writeFileSync(MAP_FILE, JSON.stringify(conversationMap, null, 2));
+  } catch {
+    // noop
+  }
+}
+
+/* =========================================================
+   CHATWOOT → ZAMMAD  (solo mensajes del cliente)
+   ========================================================= */
+app.post("/chatwoot", async (req, res) => {
+  try {
+    const event = req.body?.event;
+    if (event !== "message_created") return res.sendStatus(200);
+
+    const messageType = req.body?.message_type; // incoming / outgoing
+    if (messageType !== "incoming") return res.sendStatus(200); // evita loops
+
+    const conversationId = req.body?.conversation?.id;
+    const raw = req.body?.content || "";
+    const content = cleanBody(raw);
+    if (!conversationId || !content) return res.sendStatus(200);
+
+    const contact = req.body?.sender || {};
+    const email = contact?.email;
+    const name = contact?.name || "Cliente";
+
+    if (!email) return res.sendStatus(200);
+
+    let ticketId = conversationMap[conversationId];
+
+    // 1) Si no hay ticket asociado, crearlo
+    if (!ticketId) {
+      // Crear / buscar usuario
+      let customerId;
+      try {
+        const newUser = await axios.post(
+          `${process.env.ZAMMAD_URL}/api/v1/users`,
+          { firstname: name, lastname: "-", email, role_ids: [3] },
+          {
+            headers: {
+              Authorization: `Token token=${process.env.ZAMMAD_TOKEN}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        customerId = newUser.data.id;
+      } catch {
+        const search = await axios.get(
+          `${process.env.ZAMMAD_URL}/api/v1/users/search?query=${encodeURIComponent(email)}`,
+          { headers: { Authorization: `Token token=${process.env.ZAMMAD_TOKEN}` } }
+        );
+        customerId = search.data?.[0]?.id;
+      }
+
+      const ticket = await axios.post(
+        `${process.env.ZAMMAD_URL}/api/v1/tickets`,
+        {
+          title: `Chat #${conversationId} - ${name}`,
+          group: "Users",
+          customer_id: customerId,
+          article: {
+            subject: "Nuevo mensaje desde Chatwoot",
+            body: content,
+            type: "web",      // artículo de origen web (NO email)
+            internal: false,  // público
+          },
+        },
+        {
+          headers: {
+            Authorization: `Token token=${process.env.ZAMMAD_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      ticketId = ticket.data.id;
+      conversationMap[conversationId] = ticketId;
+      saveMap();
+
+      return res.sendStatus(200);
+    }
+
+    // 2) Si ya existe, añadir artículo público
+    await axios.post(
+      `${process.env.ZAMMAD_URL}/api/v1/ticket_articles`,
+      {
+        ticket_id: ticketId,
+        subject: "Mensaje desde Chatwoot",
+        body: content,
+        type: "web",     // mantenemos "web" para entradas de chat
+        internal: false, // público
+      },
+      {
+        headers: {
+          Authorization: `Token token=${process.env.ZAMMAD_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error("❌ Error Chatwoot → Zammad:", error.response?.data || error.message);
+    return res.sendStatus(500);
+  }
+});
+
+/* =========================================================
+   ZAMMAD → CHATWOOT  (solo notas públicas de agente)
+   ========================================================= */
+app.post("/zammad", async (req, res) => {
+  try {
+    const article = req.body?.article;
+    const ticket = req.body?.ticket;
+    if (!article || !ticket) return res.sendStatus(200);
+
+    // Filtros robustos (por si el trigger es laxo)
+    const isNote = (article.type || "").toLowerCase() === "note";
+    const isPublic = article.internal === false;
+    const fromAgent =
+      (article.sender || "").toLowerCase() === "agent" ||
+      (article.sender_name || "").toLowerCase() === "agent";
+
+    if (!(isNote && isPublic && fromAgent)) return res.sendStatus(200);
+
+    const ticketId = ticket.id;
+
+    // Recuperar conversación asociada
+    let conversationId = Object.keys(conversationMap).find(
+      (key) => conversationMap[key] === ticketId
+    );
+
+    // Fallback: si guardaste chatwoot_id como custom field en el ticket
+    if (!conversationId) {
+      const cf = ticket.custom_fields || ticket.preferences || {};
+      if (cf.chatwoot_id) {
+        conversationId = cf.chatwoot_id;
+        conversationMap[conversationId] = ticketId;
+        saveMap();
+      }
+    }
+
+    if (!conversationId) {
+      console.log("⚠ No se encontró conversación asociada a este ticket.");
+      return res.sendStatus(200);
+    }
+
+    const content = cleanBody(article.body || "");
+    if (!content) return res.sendStatus(200);
+
+    await axios.post(
+      `${process.env.CHATWOOT_URL}/api/v1/accounts/${process.env.ACCOUNT_ID}/conversations/${conversationId}/messages`,
+      {
+        content,                 // ← SIN prefijo [zammad]
+        message_type: "outgoing",
+        private: false,
+      },
+      {
+        headers: {
+          api_access_token: process.env.CHATWOOT_TOKEN,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error("❌ Error Zammad → Chatwoot:", error.response?.data || error.message);
+    return res.sendStatus(500);
+  }
+});
+
+app.listen(process.env.PORT || 4000, () => {
+  console.log("✅ Middleware activo en puerto", process.env.PORT || 4000);
+});
+```
+---------------------------------------------------------------------------------------------
 
 ## 2. Ejecutar el middleware
 
