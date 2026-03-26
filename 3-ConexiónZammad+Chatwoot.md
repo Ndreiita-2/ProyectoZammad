@@ -317,7 +317,37 @@ URL:
 ```
 http://TU_SERVIDOR/webhook/chatwoot
 ```
+----------------------------------------------nirarlo------------------------------------------------------
+Opción 3 — Permitir HTTP (solo laboratorio)
 
+Si quieres seguir en local sin HTTPS, tienes que cambiar configuración interna de Chatwoot:
+
+En el contenedor o .env de Chatwoot:
+
+ENABLE_INSECURE_WEBHOOKS=true
+
+Luego reinicias Chatwoot:
+
+docker compose restart
+
+👉 Esto permite usar:
+
+http://192.168.136.125/webhook/chatwoot
+
+✅ Opción 2 — Usar hostname en lugar de IP
+
+En la máquina de Chatwoot edita:
+
+sudo nano /etc/hosts
+
+Añade:
+
+192.168.136.125 chatwoot-middleware.local
+
+Luego en Chatwoot usa:
+
+http://chatwoot-middleware.local:4000/chatwoot
+--------------------------------------------------------------------------------------------------------------------------
 Evento:
 
 ```
