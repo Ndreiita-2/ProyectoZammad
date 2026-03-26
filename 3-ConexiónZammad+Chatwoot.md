@@ -377,17 +377,6 @@ https://polygalaceous-alaysia-unsilently.ngrok-free.dev/webhook/zammad
 W1.png
 ---
 
-
-PORT=4000
-
-ZAMMAD_URL=http://localhost:3000
-ZAMMAD_TOKEN=JBBk5iyWNnkfJflzuwkdTeRRZwCY6kdREtwpIwmRidz5BLTRE7fnHNt487e9sZcg
-
-CHATWOOT_URL=http://192.168.136.121:3000
-CHATWOOT_TOKEN=8eRMbHM3U5tAtg1yW867342F
-ACCOUNT_ID=1
-
-
 ## 6. Tokens necesarios
 
 * **Zammad:** Admin → Security → API → Crear Token
