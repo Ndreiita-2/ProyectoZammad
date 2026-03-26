@@ -5,7 +5,7 @@
 
 ### 1.1 Instalar Node.js
 
-En el servidor donde estará el middleware (puede ser la misma máquina que Chatwoot o Zammad):
+En el servidor de Zammad:
 
 ```bash
 sudo apt update
@@ -19,8 +19,8 @@ npm -v
 ### 1.2 Crear carpeta del middleware
 
 ```bash
-sudo mkdir -p /opt/chatwoot_zammad_middleware
-cd /opt/chatwoot_zammad_middleware
+sudo mkdir ~/chat-integration
+cd ~/chat-integration$
 npm init -y
 npm install express axios dotenv
 ```
@@ -50,18 +50,13 @@ Contenido:
 ```
 PORT=4000
 
-ZAMMAD_URL=http://IP_O_DOMINIO_ZAMMAD
-ZAMMAD_TOKEN=TU_TOKEN_ZAMMAD
+ZAMMAD_URL=http://localhost:3000
+ZAMMAD_TOKEN=
 
-CHATWOOT_URL=http://IP_O_DOMINIO_CHATWOOT:3000
-CHATWOOT_TOKEN=TU_TOKEN_CHATWOOT
+CHATWOOT_URL=http://IP-CHATWOOT:3000
+CHATWOOT_TOKEN=
 ACCOUNT_ID=1
 ```
-
-> Notas:
->
-> * No incluir rutas como `/app` o `/api`.
-> * En producción usar dominio con HTTPS.
 
 ---
 
@@ -71,125 +66,7 @@ ACCOUNT_ID=1
 nano index.js
 ```
 
-Contenido (resumido y compatible):
-
-```js
-import express from "express";
-import axios from "axios";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const app = express();
-app.use(express.json());
-
-// Persistencia temporal de conversaciones
-const conversationMap = {};
-
-// Chatwoot → Zammad
-app.post("/chatwoot", async (req, res) => {
-  try {
-    const event = req.body?.event;
-    if (event !== "message_created") return res.sendStatus(200);
-
-    const messageType = req.body?.message_type;
-    if (messageType !== "incoming") return res.sendStatus(200);
-
-    const conversationId = req.body?.conversation?.id;
-    const message = req.body?.content || "";
-    const contact = req.body?.sender || {};
-
-    if (!conversationId || !contact?.email) return res.sendStatus(200);
-
-    let ticketId = conversationMap[conversationId];
-
-    if (!ticketId) {
-      // Crear usuario si no existe
-      let customerId;
-      const newUser = await axios.post(
-        `${process.env.ZAMMAD_URL}/api/v1/users`,
-        {
-          firstname: contact?.name || "Sin nombre",
-          lastname: "-",
-          email: contact.email,
-          role_ids: [3]
-        },
-        {
-          headers: { Authorization: `Token token=${process.env.ZAMMAD_TOKEN}` }
-        }
-      ).catch(() => null);
-
-      if (newUser) customerId = newUser.data.id;
-      else {
-        const userSearch = await axios.get(
-          `${process.env.ZAMMAD_URL}/api/v1/users/search?query=${contact.email}`,
-          { headers: { Authorization: `Token token=${process.env.ZAMMAD_TOKEN}` } }
-        );
-        customerId = userSearch.data[0]?.id;
-      }
-
-      const newTicket = await axios.post(
-        `${process.env.ZAMMAD_URL}/api/v1/tickets`,
-        {
-          title: `Chat #${conversationId} - ${contact?.name || "Cliente"}`,
-          group: "Users",
-          customer_id: customerId,
-          article: { subject: "Nuevo mensaje desde Chatwoot", body: message.replace(/<[^>]*>?/gm, ""), type: "note", internal: false }
-        },
-        { headers: { Authorization: `Token token=${process.env.ZAMMAD_TOKEN}` } }
-      );
-
-      ticketId = newTicket.data.id;
-      conversationMap[conversationId] = ticketId;
-      return res.sendStatus(200);
-    }
-
-    // Agregar artículo a ticket existente
-    await axios.post(
-      `${process.env.ZAMMAD_URL}/api/v1/ticket_articles`,
-      { ticket_id: ticketId, subject: "Nuevo mensaje desde Chatwoot", body: message.replace(/<[^>]*>?/gm, ""), type: "note", internal: false },
-      { headers: { Authorization: `Token token=${process.env.ZAMMAD_TOKEN}` } }
-    );
-
-    return res.sendStatus(200);
-
-  } catch (error) {
-    console.error("Error Chatwoot → Zammad:", error.response?.data || error.message);
-    return res.sendStatus(500);
-  }
-});
-
-// Zammad → Chatwoot
-app.post("/zammad", async (req, res) => {
-  try {
-    const article = req.body?.article;
-    const ticket = req.body?.ticket;
-
-    if (!article || article.internal) return res.sendStatus(200);
-
-    const ticketId = ticket?.id;
-    const conversationId = Object.keys(conversationMap).find(k => conversationMap[k] === ticketId);
-    if (!conversationId) return res.sendStatus(200);
-
-    await axios.post(
-      `${process.env.CHATWOOT_URL}/api/v1/accounts/${process.env.ACCOUNT_ID}/conversations/${conversationId}/messages`,
-      { content: article.body, message_type: "outgoing" },
-      { headers: { api_access_token: process.env.CHATWOOT_TOKEN } }
-    );
-
-    return res.sendStatus(200);
-
-  } catch (error) {
-    console.error("Error Zammad → Chatwoot:", error.response?.data || error.message);
-    return res.sendStatus(500);
-  }
-});
-
-app.listen(process.env.PORT || 4000, () => {
-  console.log(`Middleware corriendo en puerto ${process.env.PORT || 4000}`);
-});
-```
----------------------------------------------------------------------------------------------
+Contenido:
 ```
 // index.js
 import express from "express";
@@ -416,7 +293,6 @@ app.listen(process.env.PORT || 4000, () => {
   console.log("✅ Middleware activo en puerto", process.env.PORT || 4000);
 });
 ```
----------------------------------------------------------------------------------------------
 
 ## 2. Ejecutar el middleware
 
@@ -429,15 +305,6 @@ Salida esperada:
 ```
 Middleware corriendo en puerto 4000
 ```
-
-* Para producción:
-
-```bash
-sudo npm install -g pm2
-pm2 start index.js --name chatwoot-zammad
-pm2 save
-```
-
 ---
 
 ## 3. Configurar Nginx para el middleware
@@ -497,7 +364,7 @@ docker compose restart
 2. URL:
 
 ```
-http://TU_SERVIDOR/webhook/zammad
+[http://TU_SERVIDOR/webhook/zammad](https://polygalaceous-alaysia-unsilently.ngrok-free.dev/webhook/zammad
 ```
 
 3. Crear Trigger en Zammad:
@@ -506,7 +373,20 @@ http://TU_SERVIDOR/webhook/zammad
    * Acción: `Webhook → tu webhook`
    * Evento: `Article is created`
 
+
+W1.png
 ---
+
+
+PORT=4000
+
+ZAMMAD_URL=http://localhost:3000
+ZAMMAD_TOKEN=JBBk5iyWNnkfJflzuwkdTeRRZwCY6kdREtwpIwmRidz5BLTRE7fnHNt487e9sZcg
+
+CHATWOOT_URL=http://192.168.136.121:3000
+CHATWOOT_TOKEN=8eRMbHM3U5tAtg1yW867342F
+ACCOUNT_ID=1
+
 
 ## 6. Tokens necesarios
 
