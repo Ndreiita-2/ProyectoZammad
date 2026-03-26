@@ -370,10 +370,36 @@ URL:
 http://TU_SERVIDOR/webhook/zammad
 ```
 
-Evento:
+Ir a Disparadores
 
+Admin → Triggers → Add Trigger
+
+Condiciones 
+
+Para pruebas iniciales puedes usar una condición simple:
+
+```text
+Ticket → State → is → open
 ```
-Ticket update
+
+---
+
+Acciones
+
+Seleccionar:
+
+```text
+Webhook → (tu webhook creado previamente)
+```
+
+---
+
+Evento
+
+Usar:
+
+```text
+Article is created
 ```
 
 ---
