@@ -304,16 +304,20 @@ http://192.168.136.X
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# INSTALACIÓN CHATWOOT (DOCKER)
+# Configuración de máquina virtual con Chatwoot (DOCKER)
 
 ## CONFIGURACIÓN DE RED
 
-Archivo netplan:
+Editar archivo de configuración de red (netplan):
 
 ```bash
 sudo nano /etc/netplan/50-cloud-init.yaml
 ```
+
 ---
+
+Configurar red estática:
+
 ```yaml
       addresses:
         - 192.168.136.Y/24
@@ -324,52 +328,106 @@ sudo nano /etc/netplan/50-cloud-init.yaml
         addresses: [8.8.8.8,1.1.1.1]
 ```
 
-Aplicar:
+Aplicar configuración de red:
 
 ```bash
 sudo netplan apply
 ```
 
-## Instalar Docker
+---
+
+## Instalación de Docker
+
+Actualizar sistema e instalar dependencias necesarias:
 
 ```bash
 sudo apt update
 sudo apt install ca-certificates curl gnupg -y
 ```
 
+Crear directorio para almacenar claves GPG:
+
 ```bash
 sudo install -m 0755 -d /etc/apt/keyrings
+```
+
+Descargar y guardar clave GPG oficial de Docker:
+
+```bash
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+```
+
+Asignar permisos de lectura a la clave:
+
+```bash
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
 ```
+
+Añadir repositorio oficial de Docker:
 
 ```bash
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 ```
 
+Actualizar lista de paquetes:
+
 ```bash
 sudo apt update
+```
+
+Instalar Docker y componentes necesarios:
+
+```bash
 sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+```
+
+Habilitar Docker para que arranque con el sistema:
+
+```bash
 sudo systemctl enable docker
+```
+
+Iniciar servicio Docker:
+
+```bash
 sudo systemctl start docker
+```
+
+Añadir usuario actual al grupo docker (para evitar usar sudo):
+
+```bash
 sudo usermod -aG docker $USER
 ```
 
-Cerrar sesión y volver a entrar.
+Cerrar sesión y volver a entrar para aplicar permisos.
 
 ---
 
-## Crear proyecto
+## Crear proyecto Chatwoot
+
+Crear directorio del proyecto:
 
 ```bash
 sudo mkdir -p /srv/chatwoot
+```
+
+Acceder al directorio:
+
+```bash
 cd /srv/chatwoot
+```
+
+Crear archivo de configuración Docker:
+
+```bash
 nano docker-compose.yml
 ```
 
 ---
 
 ## docker-compose.yml
+
+Definir servicios necesarios (PostgreSQL, Redis y Chatwoot):
 
 ```yaml
 services:
@@ -389,8 +447,7 @@ services:
     restart: unless-stopped
 
   chatwoot:
-    image: chatwoot/chatwoot:latest
-  ¿ image: chatwoot/chatwoot:v4.11.0
+    image: chatwoot/chatwoot:v4.11.0
     restart: unless-stopped
     depends_on:
       - postgres
@@ -414,13 +471,23 @@ volumes:
   postgres_data:
 ```
 
-Generar clave:
+---
+
+## Generar clave secreta
+
+Generar clave para `SECRET_KEY_BASE`:
 
 ```bash
 openssl rand -hex 64
 ```
 
-Levantar:
+Sustituir el valor `CAMBIAR_POR_CLAVE` en el archivo docker-compose.yml.
+
+---
+
+## Levantar servicios
+
+Iniciar contenedores en segundo plano:
 
 ```bash
 docker compose up -d
@@ -428,7 +495,25 @@ docker compose up -d
 
 ---
 
+## Verificación de contenedores
+
+Comprobar que los servicios están activos:
+
+```bash
+docker ps
+```
+
+Ver logs en caso de error:
+
+```bash
+docker compose logs -f
+```
+
+---
+
 ## ACCESO LOCAL CHATWOOT
+
+Acceder desde navegador:
 
 ```
 http://192.168.136.Y:3000
