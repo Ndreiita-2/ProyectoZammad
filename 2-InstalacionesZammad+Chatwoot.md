@@ -519,6 +519,14 @@ Acceder desde navegador:
 http://192.168.136.Y:3000
 ```
 
+## Archivo PID bloqueado después de reiniciar, solución:
+```
+docker compose down
+```
+```
+docker compose up -d --force-recreate
+```
+
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Perfecto. Aquí tienes la **guía finalizada y completa**, incorporando todo lo que hicimos para exponer Zammad a Internet usando **ngrok en el puerto 80**. Está lista para seguir paso a paso desde la instalación de ngrok hasta la configuración final de Nginx.
